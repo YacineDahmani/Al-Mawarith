@@ -37,7 +37,7 @@ class CaseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = [
-            'name', 'gender', 'date_of_death', 
+            'id', 'name', 'gender', 'date_of_death', 
             'total_estate_value', 'funeral_expenses', 'debts',
             'heirs', 'assets'
         ]

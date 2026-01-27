@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 export default function LandingPage() {
     return (
         <div className="min-h-screen flex flex-col w-full islamic-pattern">
-            <nav className="bg-deep-teal text-white py-4 px-8 shadow-md w-full flex justify-center">
+            <nav className="bg-dark text-white py-4 px-8 shadow-md w-full flex justify-center">
                 <div className="w-full max-w-6xl flex justify-center items-center">
-                    <h1 className="text-2xl font-bold font-serif tracking-wide">Al-Mawarith</h1>
+                    <h1 className="text-2xl font-bold font-serif tracking-wide text-gold">Al-Mawarith</h1>
 
                 </div>
             </nav>
@@ -13,11 +13,12 @@ export default function LandingPage() {
             <main className="flex-grow w-full flex flex-col items-center justify-center px-4 py-8">
                 <div className="w-full max-w-6xl">
                     <section className="text-center mb-24">
-                        <h2 className="text-5xl md:text-6xl font-serif text-deep-teal mb-6 leading-tight">
+                        <h2 className="text-5xl md:text-6xl font-serif text-deep-teal mb-4 leading-tight">
                             Islamic Inheritance Calculator
                         </h2>
-                        <p className="text-xl text-gray-700 max-w-2xl mx-auto mb-10 leading-relaxed">
+                        <p className="text-xl text-gray-700 max-w-4xl mx-auto mb-8 leading-relaxed text-center">
                             Calculate inheritance distributions according to Sharia law with precision and ease.
+                            <br className="hidden md:block" />
                             Handle complex asset types and dynamic heir relationships.
                         </p>
                         <Link to="/calculator" className="btn-primary text-lg inline-block transform hover:scale-105 transition-transform duration-300">

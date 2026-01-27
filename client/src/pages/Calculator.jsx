@@ -90,6 +90,13 @@ export default function Calculator() {
     };
 
     const handleSubmit = () => {
+        // Validate assets
+        const invalidAssets = assets.some(a => !a.name || Number(a.value) <= 0);
+        if (invalidAssets) {
+            alert("Please ensure all assets have a name and a value greater than 0.");
+            return;
+        }
+
         const fullData = {
             ...caseData,
             total_estate_value: totalAssetValue,
@@ -103,15 +110,15 @@ export default function Calculator() {
 
     return (
         <div className="min-h-screen flex flex-col w-full islamic-pattern">
-            <nav className="bg-deep-teal text-white py-4 px-8 shadow-md w-full flex justify-center">
+            <nav className="bg-dark text-white py-4 px-8 shadow-md w-full flex justify-center">
                 <div className="w-full max-w-6xl flex justify-center items-center">
-                    <h1 className="text-2xl font-bold font-serif tracking-wide">Al-Mawarith</h1>
+                    <h1 className="text-2xl font-bold font-serif tracking-wide text-gold">Al-Mawarith</h1>
                 </div>
             </nav>
 
             <main className="flex-grow w-full flex flex-col items-center justify-center px-6 py-12">
                 <div className="w-full max-w-5xl">
-                    <div className="flex justify-center mb-6">
+                    <div className="flex justify-center mb-12 mt-4">
                         {[1, 2, 3].map(s => (
                             <div key={s} className="flex items-center">
                                 <div className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold text-lg shadow-sm transition-all duration-300 border-2 ${step >= s ? 'bg-gold border-gold text-dark' : 'bg-white border-gray-200 text-gray-300'
@@ -192,8 +199,12 @@ export default function Calculator() {
                                 </div>
                             </div>
 
-                            <div className="mt-10 flex justify-end">
-                                <button onClick={() => setStep(2)} className="btn-primary px-8">
+                            <div className="mt-16 flex justify-end">
+                                <button
+                                    onClick={() => setStep(2)}
+                                    className={`btn-primary px-8 ${(!caseData.name || !caseData.date_of_death) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    disabled={!caseData.name || !caseData.date_of_death}
+                                >
                                     Next: Assets
                                 </button>
                             </div>
@@ -281,7 +292,7 @@ export default function Calculator() {
                                 </div>
                             )}
 
-                            <div className="flex justify-between pt-6">
+                            <div className="flex justify-between pt-10">
                                 <button onClick={() => setStep(1)} className="btn-ghost">
                                     <span className="mr-2">←</span> Back
                                 </button>
@@ -323,8 +334,8 @@ export default function Calculator() {
                                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                         {group.options.map(opt => {
                                             const selected = heirs.find(h => h.relationship === opt.value);
-                                            const disabled = (opt.value === 'HUSBAND' && heirs.find(h => h.relationship === 'WIFE')) ||
-                                                (opt.value === 'WIFE' && heirs.find(h => h.relationship === 'HUSBAND'));
+                                            const disabled = (opt.value === 'HUSBAND' && (heirs.find(h => h.relationship === 'WIFE') || caseData.gender === 'M')) ||
+                                                (opt.value === 'WIFE' && (heirs.find(h => h.relationship === 'HUSBAND') || caseData.gender === 'F'));
 
                                             return (
                                                 <div
@@ -387,7 +398,7 @@ export default function Calculator() {
                                 </div>
                             ))}
 
-                            <div className="flex justify-between items-center pt-8 mt-4 border-t border-gray-100">
+                            <div className="flex justify-between items-center pt-10 mt-8 border-t border-gray-100">
                                 <button onClick={() => setStep(2)} className="btn-ghost">
                                     <span className="mr-2">←</span> Back
                                 </button>

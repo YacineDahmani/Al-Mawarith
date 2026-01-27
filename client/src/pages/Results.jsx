@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { createCase, calculateInheritance } from '../api';
 
-const COLORS = ['#0F4C5C', '#D4AF37', '#1a6b7d', '#c9a230', '#2d8a9e', '#b8942a', '#3fa3b8', '#a68524'];
+const COLORS = ['#0F4C5C', '#D4AF37', '#8A2A2A', '#2E8B57', '#4682B4', '#DAA520', '#708090', '#5F9EA0'];
 
 export default function Results() {
     const navigate = useNavigate();
@@ -33,7 +33,26 @@ export default function Results() {
                 localStorage.removeItem('pendingCase');
             } catch (err) {
                 console.error(err);
-                setError('Failed to calculate inheritance. Please try again.');
+                if (err.response && err.response.data) {
+                    const errorData = err.response.data;
+
+                    const formatError = (data) => {
+                        if (typeof data === 'string') return data;
+                        if (Array.isArray(data)) return data.map(item => formatError(item)).join(' ');
+                        if (typeof data === 'object' && data !== null) {
+                            return Object.keys(data).map(key => {
+                                const val = data[key];
+                                const formattedVal = formatError(val);
+                                return `${key}: ${formattedVal}`;
+                            }).join('; ');
+                        }
+                        return 'Invalid value';
+                    };
+
+                    setError(formatError(errorData));
+                } else {
+                    setError('Failed to calculate inheritance. Please try again.');
+                }
             } finally {
                 setLoading(false);
             }
@@ -73,32 +92,32 @@ export default function Results() {
 
     return (
         <div className="min-h-screen flex flex-col w-full islamic-pattern">
-            <nav className="bg-deep-teal text-white py-4 px-8 shadow-md w-full flex justify-center">
+            <nav className="bg-dark text-white py-4 px-8 shadow-md w-full flex justify-center">
                 <div className="w-full max-w-6xl flex justify-between items-center">
-                    <h1 className="text-2xl font-bold font-serif tracking-wide">Al-Mawarith</h1>
-                    <Link to="/calculator" className="btn-primary text-sm px-4 py-2">New Calculation</Link>
+                    <h1 className="text-2xl font-bold font-serif tracking-wide text-gold">Al-Mawarith</h1>
+                    <Link to="/calculator" className="btn-primary text-sm px-4 rounded-md h-10 flex items-center">New Calculation</Link>
                 </div>
             </nav>
 
             <main className="flex-grow w-full flex flex-col items-center px-6 py-12">
                 <div className="w-full max-w-6xl">
                     <div className="text-center mb-12 animate-fadeIn">
-                        <h2 className="text-4xl font-serif text-deep-teal mb-3">Inheritance Distribution</h2>
-                        <p className="text-gray-600 text-lg">Case Reference: <span className="font-semibold text-deep-teal">{result?.deceased_name}</span></p>
+                        <h2 className="text-4xl font-serif text-deep-teal mb-2">Inheritance Distribution</h2>
+                        <p className="text-xl text-gray-600 font-serif">Case Reference: <span className="font-semibold text-deep-teal">{result?.deceased_name}</span></p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6 mb-12 animate-fadeIn" style={{ animationDelay: '0.1s' }}>
-                        <div className="card text-center">
-                            <p className="text-sm text-gray-500 mb-1 uppercase tracking-wider">Total Estate</p>
-                            <p className="text-3xl font-bold text-deep-teal">${Number(result?.total_estate).toLocaleString()}</p>
+                    <div className="grid md:grid-cols-3 gap-6 mb-12 animate-fadeIn items-stretch" style={{ animationDelay: '0.1s' }}>
+                        <div className="card text-center flex flex-col justify-center h-full py-8">
+                            <p className="text-gray-500 mb-2 font-medium">Total Estate</p>
+                            <p className="text-3xl font-bold text-deep-teal">${Number(result?.total_estate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
-                        <div className="card text-center">
-                            <p className="text-sm text-gray-500 mb-1 uppercase tracking-wider">Deductions</p>
-                            <p className="text-3xl font-bold text-red-500">-${Number(result?.deductions).toLocaleString()}</p>
+                        <div className="card text-center flex flex-col justify-center h-full py-8">
+                            <p className="text-gray-500 mb-2 font-medium">Deductions</p>
+                            <p className="text-3xl font-bold text-red-500">-${Number(result?.deductions).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
-                        <div className="card text-center">
-                            <p className="text-sm text-gray-500 mb-1 uppercase tracking-wider">Net Distributable</p>
-                            <p className="text-3xl font-bold text-gold">${Number(result?.net_estate).toLocaleString()}</p>
+                        <div className="card text-center flex flex-col justify-center h-full py-8">
+                            <p className="text-gray-500 mb-2 font-medium">Net Distributable</p>
+                            <p className="text-3xl font-bold text-gold">${Number(result?.net_estate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
                     </div>
 
@@ -116,7 +135,7 @@ export default function Results() {
                                             outerRadius={100}
                                             paddingAngle={2}
                                             dataKey="value"
-                                            label={({ name, value }) => `${name} (${value.toFixed(1)}%)`}
+                                            label={({ name, value }) => `${name} (${value.toFixed(2)}%)`}
                                         >
                                             {chartData.map((_, index) => (
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -138,27 +157,30 @@ export default function Results() {
                                 <table className="w-full">
                                     <thead>
                                         <tr className="bg-deep-teal/5">
-                                            <th className="text-left py-3 px-3 rounded-l-lg text-deep-teal text-sm font-bold uppercase">Heir</th>
-                                            <th className="text-right py-3 px-2 text-deep-teal text-sm font-bold uppercase">Count</th>
-                                            <th className="text-right py-3 px-2 text-deep-teal text-sm font-bold uppercase">Share</th>
-                                            <th className="text-right py-3 px-3 rounded-r-lg text-deep-teal text-sm font-bold uppercase">Total Value</th>
+                                            <th className="text-left py-4 px-4 rounded-l-lg text-deep-teal text-sm font-bold">Heir</th>
+                                            <th className="text-right py-4 px-4 text-deep-teal text-sm font-bold">Count</th>
+                                            <th className="text-right py-4 px-4 text-deep-teal text-sm font-bold">Share %</th>
+                                            <th className="text-right py-4 px-4 text-deep-teal text-sm font-bold">Per Person</th>
+                                            <th className="text-right py-4 px-4 rounded-r-lg text-deep-teal text-sm font-bold">Total Value</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {result?.distributions?.map((d, i) => (
                                             <tr key={i} className="hover:bg-gray-50 transition-colors">
-                                                <td className="py-4 px-3 font-medium text-gray-800">
+                                                <td className="py-4 px-4 font-medium text-gray-800">
                                                     {d.relationship_display}
-                                                    <div className="text-xs text-gray-400 font-normal mt-0.5">${Number(d.per_person_value).toLocaleString()} / person</div>
                                                 </td>
-                                                <td className="text-right py-4 px-2 text-gray-600">{d.count}</td>
-                                                <td className="text-right py-4 px-2">
+                                                <td className="text-right py-4 px-4 text-gray-600">{d.count}</td>
+                                                <td className="text-right py-4 px-4">
                                                     <span className="bg-deep-teal/10 text-deep-teal px-2 py-1 rounded text-xs font-bold">
                                                         {d.percentage.toFixed(2)}%
                                                     </span>
                                                 </td>
-                                                <td className="text-right py-4 px-3 text-gold font-bold">
-                                                    ${Number(d.total_value).toLocaleString()}
+                                                <td className="text-right py-4 px-4 text-gray-600">
+                                                    ${Number(d.per_person_value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </td>
+                                                <td className="text-right py-4 px-4 text-gold font-bold">
+                                                    ${Number(d.total_value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                 </td>
                                             </tr>
                                         ))}
@@ -169,8 +191,8 @@ export default function Results() {
                     </div>
 
                     <div className="text-center print:hidden animate-fadeIn" style={{ animationDelay: '0.3s' }}>
-                        <Link to="/" className="btn-secondary mr-4 px-8 py-3 bg-gray-600 hover:bg-gray-700">Back to Home</Link>
-                        <button onClick={() => window.print()} className="btn-primary px-8 py-3 shadow-lg">Print Report</button>
+                        <Link to="/" className="btn-outline border-deep-teal text-deep-teal hover:bg-deep-teal hover:text-white mr-4 px-8 py-3 rounded-md">Back to Home</Link>
+                        <button onClick={() => window.print()} className="btn-primary px-8 py-3 shadow-lg rounded-md">Print Report</button>
                     </div>
                 </div>
             </main>

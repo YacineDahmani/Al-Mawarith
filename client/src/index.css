@@ -95,8 +95,11 @@ h6 {
   clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
 }
 
-/* Button Styles */
-.btn-base {
+.btn-base,
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-ghost {
   padding: 12px 32px;
   border-radius: 8px;
   font-weight: 600;
@@ -108,7 +111,6 @@ h6 {
 }
 
 .btn-primary {
-  @apply btn-base;
   background: linear-gradient(135deg, var(--color-gold) 0%, #c9a230 100%);
   color: var(--color-dark);
   border: none;
@@ -128,7 +130,6 @@ h6 {
 }
 
 .btn-secondary {
-  @apply btn-base;
   background: var(--color-deep-teal);
   color: white;
   border: none;
@@ -139,7 +140,6 @@ h6 {
 }
 
 .btn-outline {
-  @apply btn-base;
   background: transparent;
   color: var(--color-deep-teal);
   border: 2px solid var(--color-deep-teal);
@@ -152,7 +152,6 @@ h6 {
 }
 
 .btn-ghost {
-  @apply btn-base;
   background: transparent;
   color: #6b7280;
   padding: 12px 24px;
