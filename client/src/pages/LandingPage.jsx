@@ -11,19 +11,21 @@ export default function LandingPage() {
 
             <main className="flex-grow w-full flex flex-col items-center justify-center px-4 py-8">
                 <div className="w-full max-w-6xl">
-                    <section className="text-center mb-24">
-                        <h2 className="text-5xl md:text-6xl font-serif text-deep-teal mb-4 leading-tight">
+                    <section style={{ textAlign: 'center', marginBottom: '48px' }}>
+                        <h2 className="font-serif text-deep-teal" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.75rem)', lineHeight: 1.15, marginBottom: '20px' }}>
                             {t('heroTitle')}
                         </h2>
-                        <p className="text-xl text-gray-700 max-w-4xl mx-auto mb-8 leading-relaxed text-center">
-                            {t('heroDesc')}
-                        </p>
-                        <Link to="/calculator" className="btn-primary text-lg inline-block transform hover:scale-105 transition-transform duration-300">
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+                            <p style={{ fontSize: '1.15rem', color: '#374151', maxWidth: '560px', lineHeight: 1.7, textAlign: 'center' }}>
+                                {t('heroDesc')}
+                            </p>
+                        </div>
+                        <Link to="/calculator" className="btn-primary" style={{ fontSize: '17px', padding: '14px 40px', display: 'inline-block' }}>
                             {t('startBtn')}
                         </Link>
                     </section>
 
-                    <section className="grid md:grid-cols-3 gap-8 mb-24 items-stretch">
+                    <section className="grid md:grid-cols-3 gap-8 items-stretch" style={{ marginBottom: '48px' }}>
                         <div className="card text-center hover:shadow-xl transition-shadow duration-300 h-full flex flex-col items-center">
                             <div className="w-16 h-16 bg-deep-teal/10 rounded-full flex items-center justify-center mb-6 mx-auto">
                                 <svg className="w-8 h-8 text-deep-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
