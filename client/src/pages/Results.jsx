@@ -111,30 +111,31 @@ export default function Results() {
                     {/* Title */}
                     <div className="animate-fadeIn" style={{ textAlign: 'center', marginBottom: '32px' }}>
                         <h2 className="font-serif text-deep-teal" style={{ fontSize: '2rem', marginBottom: '8px' }}>{t('inheritanceDistribution')}</h2>
+                        <div className="arabesque-divider"></div>
                         <p className="font-serif" style={{ fontSize: '1.1rem', color: '#4b5563' }}>{t('caseReference')}: <span className="text-deep-teal" style={{ fontWeight: 600 }}>{result?.deceased_name}</span></p>
                     </div>
 
                     {/* Summary Cards */}
-                    <div className="animate-fadeIn" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '32px', animationDelay: '0.1s' }}>
-                        <div className="card" style={{ textAlign: 'center', padding: '24px 16px' }}>
+                    <div className="animate-fadeIn grid grid-cols-1 md:grid-cols-3 gap-5 mb-8" style={{ animationDelay: '0.1s' }}>
+                        <div className="card w-full h-full flex flex-col items-center justify-center text-center">
                             <p style={{ color: '#6b7280', marginBottom: '8px', fontWeight: 500, fontSize: '14px' }}>{t('totalEstate')}</p>
                             <p className="text-deep-teal" style={{ fontSize: '1.75rem', fontWeight: 'bold' }}>${Number(result?.total_estate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
-                        <div className="card" style={{ textAlign: 'center', padding: '24px 16px' }}>
+                        <div className="card w-full h-full flex flex-col items-center justify-center text-center">
                             <p style={{ color: '#6b7280', marginBottom: '8px', fontWeight: 500, fontSize: '14px' }}>{t('deductions')}</p>
                             <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#ef4444' }}>-${Number(result?.deductions).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
-                        <div className="card" style={{ textAlign: 'center', padding: '24px 16px' }}>
+                        <div className="card w-full h-full flex flex-col items-center justify-center text-center">
                             <p style={{ color: '#6b7280', marginBottom: '8px', fontWeight: 500, fontSize: '14px' }}>{t('netDistributable')}</p>
                             <p className="text-gold" style={{ fontSize: '1.75rem', fontWeight: 'bold' }}>${Number(result?.net_estate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
                     </div>
 
                     {/* Chart + Table */}
-                    <div className="animate-fadeIn" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px', animationDelay: '0.2s' }}>
+                    <div className="animate-fadeIn grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8" style={{ animationDelay: '0.2s' }}>
 
                         {/* Pie Chart */}
-                        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                        <div className="card w-full h-full" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                             <h3 className="font-serif text-deep-teal" style={{ fontSize: '1.15rem', marginBottom: '16px', textAlign: 'center', paddingBottom: '12px', borderBottom: '1px solid #f3f4f6' }}>{t('distributionChart')}</h3>
                             <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <ResponsiveContainer width="100%" height={320}>
@@ -143,8 +144,8 @@ export default function Results() {
                                             data={chartData}
                                             cx="50%"
                                             cy="45%"
-                                            innerRadius={50}
-                                            outerRadius={100}
+                                            innerRadius="45%"
+                                            outerRadius="75%"
                                             paddingAngle={3}
                                             dataKey="value"
                                         >
@@ -170,7 +171,7 @@ export default function Results() {
                         </div>
 
                         {/* Detailed Breakdown Table */}
-                        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div className="card w-full h-full" style={{ display: 'flex', flexDirection: 'column' }}>
                             <h3 className="font-serif text-deep-teal" style={{ fontSize: '1.15rem', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid #f3f4f6' }}>{t('detailedBreakdown')}</h3>
                             <div style={{ flexGrow: 1, overflowX: 'auto' }}>
                                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
