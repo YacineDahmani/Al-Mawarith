@@ -93,7 +93,7 @@ export default function Calculator() {
     };
 
     const handleSubmit = () => {
-        const invalidAssets = assets.some(a => !a.name || Number(a.value) <= 0);
+        const invalidAssets = assets.some(a => !a.name || !a.name.trim() || Number(a.value) <= 0);
         if (invalidAssets) {
             alert("Please ensure all assets have a name and a value greater than 0.");
             return;
@@ -167,7 +167,7 @@ export default function Calculator() {
                                         <label className="block text-sm font-semibold text-gray-700" style={{ marginBottom: '8px' }}>{t('fullName')} <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
-                                            className="input-field"
+                                            className={`input-field ${!caseData.name.trim() && caseData.name !== '' ? 'border-red-500 box-shadow-red' : ''}`}
                                             value={caseData.name}
                                             onChange={e => setCaseData({ ...caseData, name: e.target.value })}
                                             placeholder={t('fullName')}
@@ -202,13 +202,15 @@ export default function Calculator() {
                                             <span className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-500 font-medium`}>$</span>
                                             <input
                                                 type="number"
-                                                className={`input-field ${isRTL ? '!pr-10' : '!pl-10'}`}
+                                                className={`input-field ${isRTL ? '!pr-10' : '!pl-10'} ${caseData.funeral_expenses < 0 ? 'border-red-500 box-shadow-red' : ''}`}
                                                 value={caseData.funeral_expenses}
-                                                onChange={e => setCaseData({ ...caseData, funeral_expenses: Number(e.target.value) })}
+                                                onChange={e => setCaseData({ ...caseData, funeral_expenses: Math.max(0, Number(e.target.value)) })}
                                                 min="0"
+                                                step="any"
                                                 placeholder="0.00"
                                             />
                                         </div>
+                                        {caseData.funeral_expenses < 0 && <p className="text-red-500 text-xs mt-1">Value cannot be negative</p>}
                                     </div>
 
                                     <div>
@@ -217,21 +219,23 @@ export default function Calculator() {
                                             <span className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-500 font-medium`}>$</span>
                                             <input
                                                 type="number"
-                                                className={`input-field ${isRTL ? '!pr-10' : '!pl-10'}`}
+                                                className={`input-field ${isRTL ? '!pr-10' : '!pl-10'} ${caseData.debts < 0 ? 'border-red-500 box-shadow-red' : ''}`}
                                                 value={caseData.debts}
-                                                onChange={e => setCaseData({ ...caseData, debts: Number(e.target.value) })}
+                                                onChange={e => setCaseData({ ...caseData, debts: Math.max(0, Number(e.target.value)) })}
                                                 min="0"
+                                                step="any"
                                                 placeholder="0.00"
                                             />
                                         </div>
+                                        {caseData.debts < 0 && <p className="text-red-500 text-xs mt-1">Value cannot be negative</p>}
                                     </div>
                                 </div>
 
                                 <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #f3f4f6', display: 'flex', justifyContent: 'center' }}>
                                     <button
                                         onClick={() => setStep(2)}
-                                        className={`btn-primary ${(!caseData.name || !caseData.date_of_death) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        disabled={!caseData.name || !caseData.date_of_death}
+                                        className={`btn-primary ${(!caseData.name.trim() || !caseData.date_of_death) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        disabled={!caseData.name.trim() || !caseData.date_of_death}
                                         style={{ padding: '16px 48px', fontSize: '18px' }}
                                     >
                                         {t('nextAssets')}
@@ -267,17 +271,21 @@ export default function Calculator() {
                                     </div>
                                 )}
 
-                                {assets.map((asset, index) => (
-                                    <div key={index} style={{ display: 'grid', gridTemplateColumns: '3fr 2fr 2fr auto', gap: '16px', marginBottom: '16px', padding: '20px', backgroundColor: '#f5f5f5', borderRadius: '12px', alignItems: 'end' }}>
+                                {assets.map((asset, index) => {
+                                    const isInvalidName = !asset.name || asset.name.trim() === '';
+                                    const isInvalidValue = asset.value === '' || Number(asset.value) <= 0;
+                                    return (
+                                    <div key={index} style={{ display: 'grid', gridTemplateColumns: '3fr 2fr 2fr auto', gap: '16px', marginBottom: '16px', padding: '20px', backgroundColor: '#f5f5f5', borderRadius: '12px', alignItems: 'start' }}>
                                         <div>
-                                            <label className="block text-xs font-semibold text-gray-500" style={{ marginBottom: '4px' }}>{t('assetName')}</label>
+                                            <label className="block text-xs font-semibold text-gray-500" style={{ marginBottom: '4px' }}>{t('assetName')} <span className="text-red-500">*</span></label>
                                             <input
                                                 type="text"
-                                                className="input-field"
-                                                placeholder="e.g., Family Home"
+                                                className={`input-field ${isInvalidName ? 'border border-red-300' : ''}`}
+                                                placeholder={t('assetNamePlaceholder')}
                                                 value={asset.name}
                                                 onChange={e => updateAsset(index, 'name', e.target.value)}
                                             />
+                                            {isInvalidName && <p className="text-red-500 text-[10px] mt-1">Name required</p>}
                                         </div>
                                         <div>
                                             <label className="block text-xs font-semibold text-gray-500" style={{ marginBottom: '4px' }}>{t('assetType')}</label>
@@ -294,21 +302,23 @@ export default function Calculator() {
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-semibold text-gray-500" style={{ marginBottom: '4px' }}>{t('assetValue')}</label>
+                                            <label className="block text-xs font-semibold text-gray-500" style={{ marginBottom: '4px' }}>{t('assetValue')} <span className="text-red-500">*</span></label>
                                             <input
                                                 type="number"
-                                                className="input-field"
+                                                className={`input-field ${isInvalidValue ? 'border border-red-300' : ''}`}
                                                 placeholder="0.00"
                                                 value={asset.value}
-                                                onChange={e => updateAsset(index, 'value', e.target.value)}
+                                                onChange={e => updateAsset(index, 'value', Math.max(0, Number(e.target.value)) || '')}
                                                 min="0"
+                                                step="any"
                                             />
+                                            {isInvalidValue && <p className="text-red-500 text-[10px] mt-1">Value &gt; 0 req</p>}
                                         </div>
-                                        <div style={{ paddingBottom: '4px' }}>
+                                        <div style={{ paddingTop: '24px' }}>
                                             <button
                                                 onClick={() => removeAsset(index)}
-                                                className="text-red-400 hover:text-red-600"
-                                                style={{ padding: '8px', borderRadius: '8px' }}
+                                                className="text-red-400 hover:text-red-600 transition-colors"
+                                                style={{ padding: '8px', borderRadius: '8px', background: '#ffeef0' }}
                                                 title={t('removeAsset')}
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,7 +327,7 @@ export default function Calculator() {
                                             </button>
                                         </div>
                                     </div>
-                                ))}
+                                )})}
 
                                 {assets.length > 0 && (
                                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
@@ -333,8 +343,8 @@ export default function Calculator() {
                                     </button>
                                     <button
                                         onClick={() => setStep(3)}
-                                        className={`btn-primary ${assets.length === 0 || assets.some(a => !a.name || Number(a.value) <= 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        disabled={assets.length === 0 || assets.some(a => !a.name || Number(a.value) <= 0)}
+                                        className={`btn-primary ${assets.length === 0 || assets.some(a => !a.name || !a.name.trim() || Number(a.value) <= 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        disabled={assets.length === 0 || assets.some(a => !a.name || !a.name.trim() || Number(a.value) <= 0)}
                                         style={{ padding: '16px 48px', fontSize: '18px' }}
                                     >
                                         {t('nextHeirs')}
@@ -418,10 +428,15 @@ export default function Calculator() {
                                                                             </button>
                                                                         </>
                                                                     ) : (
-                                                                        <span style={{ color: '#0F4C5C', fontWeight: 600, padding: '4px 8px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                            <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                                                            {t('selected')}
-                                                                        </span>
+                                                                          <button 
+                                                                              onClick={() => toggleHeir(opt.value)}
+                                                                              style={{ color: '#0F4C5C', fontWeight: 600, padding: '4px 8px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', border: 'none', background: 'transparent', cursor: 'pointer' }}
+                                                                              title={t('remove')}
+                                                                          >
+                                                                              <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                                              {t('selected')}
+                                                                              <svg style={{ width: '14px', height: '14px', color: '#ef4444' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                                          </button>
                                                                     )}
                                                                 </div>
                                                             ) : (

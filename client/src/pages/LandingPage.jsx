@@ -65,6 +65,17 @@ export default function LandingPage() {
                     <p className="text-2xl font-serif mb-4 text-gold">{t('appTitle')}</p>
                     <p className="text-gray-400 mb-2">{t('appSubtitle')}</p>
                     <p className="text-sm text-gray-500">{t('footerDesc')}</p>
+                    <p className="text-xs text-gray-500 mt-4">
+                        Credit:{' '}
+                        <a
+                            href="https://github.com/YacineDahmani"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-gold hover:underline"
+                        >
+                            YacineDahmani
+                        </a>
+                    </p>
                 </div>
             </footer>
         </div>

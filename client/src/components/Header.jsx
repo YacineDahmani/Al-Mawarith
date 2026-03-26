@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function Header({ rightContent }) {
-    const { t, language, toggleLanguage } = useLanguage();
+    const { t, language, setLanguage } = useLanguage();
 
     return (
         <nav className="bg-dark text-white py-4 px-8 shadow-md w-full flex justify-center">
@@ -13,12 +13,29 @@ export default function Header({ rightContent }) {
 
                 <div className="flex items-center gap-4">
                     {rightContent}
-                    <button
-                        onClick={toggleLanguage}
-                        className="px-3 py-1 rounded-md border border-gray-600 hover:border-gold hover:text-gold transition-colors text-sm font-medium"
+                    <div
+                        className={`lang-switch ${language === 'en' ? 'is-en' : 'is-ar'}`}
+                        role="group"
+                        aria-label="Language selector"
+                        dir="ltr"
                     >
-                        {language === 'en' ? 'العربية' : 'English'}
-                    </button>
+                        <button
+                            type="button"
+                            onClick={() => setLanguage('en')}
+                            className={`lang-switch__option ${language === 'en' ? 'is-active' : ''}`}
+                            aria-pressed={language === 'en'}
+                        >
+                            EN
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setLanguage('ar')}
+                            className={`lang-switch__option ${language === 'ar' ? 'is-active' : ''}`}
+                            aria-pressed={language === 'ar'}
+                        >
+                            AR
+                        </button>
+                    </div>
                 </div>
             </div>
         </nav>

@@ -234,3 +234,74 @@ h6 {
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-out forwards;
 }
+
+.lang-switch {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  width: 76px;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.lang-switch::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 34px;
+  height: 24px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-gold) 0%, #c9a230 100%);
+  box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+  transition: transform 0.22s ease;
+}
+
+.lang-switch.is-ar::before {
+  transform: translateX(38px);
+}
+
+.lang-switch__option {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #d1d5db;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.lang-switch__option:hover {
+  color: #f3f4f6;
+}
+
+.lang-switch__option.is-active {
+  color: #1A1A2E;
+  animation: langSwitchPop 0.2s ease-out;
+}
+
+.lang-switch__option:focus-visible {
+  outline: 2px solid rgba(212, 175, 55, 0.8);
+  outline-offset: 2px;
+}
+
+@keyframes langSwitchPop {
+  from {
+    transform: scale(0.96);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
