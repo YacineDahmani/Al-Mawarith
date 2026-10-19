@@ -305,3 +305,26 @@ h6 {
     transform: scale(1);
   }
 }
+
+@media print {
+  nav,
+  footer,
+  .no-print,
+  .btn-primary,
+  .btn-outline,
+  .btn-ghost {
+    display: none !important;
+  }
+
+  body,
+  .islamic-pattern {
+    background: white !important;
+    color: black !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    page-break-inside: avoid;
+  }
+}

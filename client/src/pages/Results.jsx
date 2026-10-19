@@ -5,7 +5,7 @@ import { createCase, calculateInheritance } from '../api';
 import Header from '../components/Header';
 import { useLanguage } from '../context/LanguageContext';
 
-const COLORS = ['#0F4C5C', '#D4AF37', '#8A2A2A', '#2E8B57', '#4682B4', '#DAA520', '#708090', '#5F9EA0'];
+const COLORS = ['#0F4C5C', '#C29015', '#8A2A2A', '#2E8B57', '#3B82F6', '#D97706', '#64748B', '#0D9488'];
 
 export default function Results() {
     const navigate = useNavigate();
@@ -14,88 +14,78 @@ export default function Results() {
     const [error, setError] = useState(null);
     const [result, setResult] = useState(null);
 
-    useEffect(() => {
+    const processCase = async () => {
         const pendingCase = localStorage.getItem('pendingCase');
         if (!pendingCase) {
             navigate('/calculator');
             return;
         }
 
-        const processCase = async () => {
-            try {
-                const caseData = JSON.parse(pendingCase);
-                const response = await createCase(caseData);
-                const caseId = response.data.id;
-                const calcResponse = await calculateInheritance(caseId);
+        setLoading(true);
+        setError(null);
 
-                if (calcResponse.data.error) {
-                    setError(calcResponse.data.error);
-                } else {
-                    setResult(calcResponse.data);
-                }
-                localStorage.removeItem('pendingCase');
-            } catch (err) {
-                console.error(err);
-                if (err.response && err.response.data) {
-                    const errorData = err.response.data;
+        try {
+            const caseData = JSON.parse(pendingCase);
+            const response = await createCase(caseData);
+            const caseId = response.data.id;
+            const calcResponse = await calculateInheritance(caseId);
 
-                    const formatError = (data) => {
-                        if (typeof data === 'string') return data;
-                        if (Array.isArray(data)) return data.map(item => formatError(item)).join(' ');
-                        if (typeof data === 'object' && data !== null) {
-                            return Object.keys(data).map(key => {
-                                const val = data[key];
-                                const formattedVal = formatError(val);
-                                return `${key}: ${formattedVal}`;
-                            }).join('; ');
-                        }
-                        return 'Invalid value';
-                    };
-
-                    setError(formatError(errorData));
-                } else {
-                    const networkMessage =
-                        err.code === 'ERR_NETWORK' || err.message === 'Network Error'
-                            ? 'Cannot reach the backend server. Please start the Django server on port 8000 and try again.'
-                            : 'Failed to calculate inheritance. Please try again.';
-                    setError(networkMessage);
-                }
-            } finally {
-                setLoading(false);
+            if (calcResponse.data.error) {
+                setError(calcResponse.data.error);
+            } else {
+                setResult(calcResponse.data);
             }
-        };
+        } catch (err) {
+            console.error(err);
+            if (err.response?.data) {
+                const errorData = err.response.data;
+                const formatError = (data) => {
+                    if (typeof data === 'string') return data;
+                    if (Array.isArray(data)) return data.map(item => formatError(item)).join(' ');
+                    if (typeof data === 'object' && data !== null) {
+                        return Object.keys(data).map(key => `${key}: ${formatError(data[key])}`).join('; ');
+                    }
+                    return 'Calculation could not be processed.';
+                };
+                setError(formatError(errorData));
+            } else {
+                setError('Failed to reach calculation service. Please verify server connectivity and retry.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         processCase();
     }, [navigate]);
 
     if (loading) {
         return (
-            <div className="min-h-screen flex flex-col w-full islamic-pattern" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div style={{
-                        width: '64px',
-                        height: '64px',
-                        border: '4px solid #D4AF37',
-                        borderTopColor: 'transparent',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                        margin: '0 auto 16px',
-                    }}></div>
-                    <p className="text-deep-teal" style={{ fontSize: '1.25rem' }}>{t('calculating')}</p>
+            <div className="min-h-screen flex flex-col w-full islamic-pattern items-center justify-center">
+                <div className="text-center p-8 bg-white/90 rounded-2xl border border-stone-200 shadow-sm">
+                    <div className="w-12 h-12 border-3 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-deep-teal font-serif text-lg font-bold">{t('calculating')}</p>
                 </div>
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen flex flex-col w-full islamic-pattern" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div className="card" style={{ textAlign: 'center', maxWidth: '480px', width: '100%', margin: '0 16px' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⚠️</div>
-                    <h3 className="font-serif text-deep-teal" style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{t('calcError')}</h3>
-                    <p style={{ color: '#4b5563', marginBottom: '24px' }}>{error}</p>
-                    <Link to="/calculator" className="btn-primary">{t('backToCalculator')}</Link>
+            <div className="min-h-screen flex flex-col w-full islamic-pattern items-center justify-center p-4">
+                <div className="card text-center max-w-md w-full p-8">
+                    <div className="text-4xl mb-4">⚠️</div>
+                    <h3 className="font-serif text-deep-teal text-2xl font-bold mb-2">{t('calcError')}</h3>
+                    <p className="text-stone-600 text-sm mb-6 leading-relaxed">{error}</p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button type="button" onClick={processCase} className="btn-secondary text-sm">
+                            Retry Calculation
+                        </button>
+                        <Link to="/calculator" className="btn-primary text-sm">
+                            {t('backToCalculator')}
+                        </Link>
+                    </div>
                 </div>
             </div>
         );
@@ -104,56 +94,100 @@ export default function Results() {
     const chartData = result?.distributions?.map(d => ({
         name: t(d.relationship) || d.relationship_display,
         value: d.percentage,
-        totalValue: Number(d.total_value)
+        totalValue: Number(d.total_value),
     })) || [];
 
     return (
         <div className="min-h-screen flex flex-col w-full islamic-pattern">
+            <Header />
 
-            <main style={{ flexGrow: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 24px' }}>
-                <div style={{ width: '100%', maxWidth: '1400px' }}>
+            <main className="flex-grow w-full flex flex-col items-center px-4 sm:px-6 py-10">
+                <div className="w-full max-w-6xl">
 
-                    {/* Title */}
-                    <div className="animate-fadeIn" style={{ textAlign: 'center', marginBottom: '40px' }}>
-                        <h2 className="font-serif text-deep-teal" style={{ fontSize: '2.5rem', marginBottom: '8px', fontWeight: 'bold' }}>{t('inheritanceDistribution')}</h2>
-                        <div className="arabesque-divider"></div>
-                        <p className="font-serif bg-white px-6 py-2 rounded-full shadow-sm inline-block mt-4 text-gray-700" style={{ fontSize: '1.15rem' }}>
-                            {t('caseReference')}: <span className="text-gold" style={{ fontWeight: 700 }}>{result?.deceased_name}</span>
-                        </p>
+                    {/* Title & Case Reference */}
+                    <div className="text-center mb-8 animate-fadeIn">
+                        <h2 className="font-serif text-deep-teal text-3xl sm:text-4xl font-bold mb-2">
+                            {t('inheritanceDistribution')}
+                        </h2>
+                        <div className="arabesque-divider" />
+                        <div className="inline-flex items-center gap-2 bg-white px-5 py-1.5 rounded-full border border-stone-200 shadow-xs text-sm sm:text-base mt-2">
+                            <span className="text-stone-600 font-medium">{t('caseReference')}:</span>
+                            <span className="text-deep-teal font-bold">{result?.deceased_name}</span>
+                        </div>
+                    </div>
+
+                    {/* Sharia Rules & Asl al-Mas'ala Badges */}
+                    <div className="flex flex-wrap justify-center items-center gap-3 mb-8 animate-fadeIn">
+                        <div className="inline-flex items-center gap-1.5 bg-deep-teal/10 border border-deep-teal/20 text-deep-teal px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold">
+                            <span>📐</span>
+                            <span>{t('aslAlMasala')}:</span>
+                            <span className="tabular-nums font-bold text-base">{result?.asl_al_masala}</span>
+                        </div>
+
+                        {result?.umariyyatan_applied && (
+                            <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 text-amber-900 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold">
+                                <span>⚖️</span>
+                                <span>{t('umariyyatanApplied')}</span>
+                            </div>
+                        )}
+
+                        {result?.awl_applied && (
+                            <div className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-300 text-rose-900 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold">
+                                <span>📉</span>
+                                <span>{t('awlApplied')}</span>
+                            </div>
+                        )}
+
+                        {result?.radd_applied && (
+                            <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 text-emerald-900 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold">
+                                <span>📈</span>
+                                <span>{t('raddApplied')}</span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Summary Cards */}
-                    <div className="animate-fadeIn grid grid-cols-1 md:grid-cols-3 gap-6 mb-10" style={{ animationDelay: '0.1s' }}>
-                        <div className="card w-full flex flex-col items-center justify-center text-center hover:-translate-y-1 transition-transform duration-300">
-                            <div className="bg-deep-teal/10 p-4 rounded-full mb-4">
-                                <svg className="w-8 h-8 text-deep-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <p style={{ color: '#6b7280', marginBottom: '8px', fontWeight: 600, fontSize: '15px' }}>{t('totalEstate')}</p>
-                            <p className="text-deep-teal" style={{ fontSize: '2rem', fontWeight: '800' }}>${Number(result?.total_estate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8 animate-fadeIn">
+                        <div className="card text-center p-6 flex flex-col justify-between">
+                            <p className="text-stone-500 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2">
+                                {t('totalEstate')}
+                            </p>
+                            <p className="text-deep-teal text-2xl sm:text-3xl font-extrabold tabular-nums">
+                                ${Number(result?.total_estate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <span className="text-xs text-stone-400 mt-2">Gross assets</span>
                         </div>
-                        <div className="card w-full flex flex-col items-center justify-center text-center hover:-translate-y-1 transition-transform duration-300">
-                            <div className="bg-red-50 p-4 rounded-full mb-4">
-                                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4"></path></svg>
-                            </div>
-                            <p style={{ color: '#6b7280', marginBottom: '8px', fontWeight: 600, fontSize: '15px' }}>{t('deductions')}</p>
-                            <p style={{ fontSize: '2rem', fontWeight: '800', color: '#ef4444' }}>-${Number(result?.deductions).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+
+                        <div className="card text-center p-6 flex flex-col justify-between">
+                            <p className="text-stone-500 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2">
+                                {t('deductions')}
+                            </p>
+                            <p className="text-rose-600 text-2xl sm:text-3xl font-extrabold tabular-nums">
+                                -${Number(result?.deductions).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <span className="text-xs text-stone-400 mt-2">Debts & funeral expenses</span>
                         </div>
-                        <div className="card w-full flex flex-col items-center justify-center text-center hover:-translate-y-1 transition-transform duration-300" style={{ border: '2px solid rgba(212,175,55,0.2)' }}>
-                            <div className="bg-gold/10 p-4 rounded-full mb-4">
-                                <svg className="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <p style={{ color: '#6b7280', marginBottom: '8px', fontWeight: 600, fontSize: '15px' }}>{t('netDistributable')}</p>
-                            <p className="text-gold" style={{ fontSize: '2.25rem', fontWeight: '800' }}>${Number(result?.net_estate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+
+                        <div className="card text-center p-6 flex flex-col justify-between border-2 border-amber-300/60 bg-amber-50/20">
+                            <p className="text-stone-700 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2">
+                                {t('netDistributable')}
+                            </p>
+                            <p className="text-amber-800 text-2xl sm:text-3xl font-extrabold tabular-nums">
+                                ${Number(result?.net_estate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <span className="text-xs text-amber-700 font-medium mt-2">100% distributed</span>
                         </div>
                     </div>
 
-                    {/* Analysis & Charts */}
-                    <div className="animate-fadeIn grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10" style={{ animationDelay: '0.2s' }}>
+                    {/* Charts Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 animate-fadeIn no-print">
                         {/* Donut Chart */}
-                        <div className="card w-full h-full" style={{ padding: '40px 24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                            <h3 className="font-serif text-deep-teal" style={{ fontSize: '1.25rem', marginBottom: '24px', textAlign: 'center', fontWeight: 'bold' }}>Percentage Distribution</h3>
-                            <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <ResponsiveContainer width="100%" height={350}>
+                        <div className="card p-6 flex flex-col">
+                            <h3 className="font-serif text-deep-teal text-lg font-bold text-center mb-4">
+                                {t('distributionChart')} (%)
+                            </h3>
+                            <div className="h-72 w-full flex items-center justify-center">
+                                <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
                                             data={chartData}
@@ -161,8 +195,8 @@ export default function Results() {
                                             cy="50%"
                                             innerRadius="55%"
                                             outerRadius="80%"
-                                            paddingAngle={4}
-                                            cornerRadius={6}
+                                            paddingAngle={3}
+                                            cornerRadius={4}
                                             dataKey="value"
                                             stroke="none"
                                         >
@@ -172,31 +206,36 @@ export default function Results() {
                                         </Pie>
                                         <Tooltip
                                             formatter={(value, name) => [`${value.toFixed(2)}%`, name]}
-                                            contentStyle={{ backgroundColor: '#1f2937', color: '#fff', borderRadius: '8px', border: 'none', padding: '12px' }}
-                                            itemStyle={{ color: '#e5e7eb' }}
+                                            contentStyle={{ backgroundColor: '#1A1A2E', color: '#fff', borderRadius: '8px', border: 'none' }}
                                         />
-                                        <Legend stroke="none" verticalAlign="bottom" align="center" iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                                        <Legend verticalAlign="bottom" align="center" iconType="circle" />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
 
                         {/* Bar Chart */}
-                        <div className="card w-full h-full" style={{ padding: '40px 24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                            <h3 className="font-serif text-deep-teal" style={{ fontSize: '1.25rem', marginBottom: '24px', textAlign: 'center', fontWeight: 'bold' }}>Value Distribution (USD)</h3>
-                            <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
-                                <ResponsiveContainer width="100%" height={320}>
-                                    <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} barSize={40}>
+                        <div className="card p-6 flex flex-col">
+                            <h3 className="font-serif text-deep-teal text-lg font-bold text-center mb-4">
+                                {t('totalShareValue')} ($)
+                            </h3>
+                            <div className="h-72 w-full flex items-center justify-center">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={chartData} margin={{ top: 15, right: 20, left: 10, bottom: 5 }} barSize={36}>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                                        <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 13 }} axisLine={false} tickLine={false} />
-                                        <YAxis tickFormatter={(val) => `$${val >= 1000 ? (val/1000).toFixed(1)+'k' : val}`} tick={{ fill: '#6b7280', fontSize: 13 }} axisLine={false} tickLine={false} />
-                                        <Tooltip
-                                            cursor={{ fill: 'rgba(15,76,92,0.05)' }}
-                                            formatter={(value, name) => [`$${value.toLocaleString()}`, name]}
-                                            contentStyle={{ backgroundColor: '#1f2937', color: '#fff', borderRadius: '8px', border: 'none', padding: '12px' }}
-                                            itemStyle={{ color: '#e5e7eb' }}
+                                        <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                        <YAxis
+                                            tickFormatter={(val) => `$${val >= 1000 ? (val/1000).toFixed(0)+'k' : val}`}
+                                            tick={{ fill: '#6b7280', fontSize: 12 }}
+                                            axisLine={false}
+                                            tickLine={false}
                                         />
-                                        <Bar dataKey="totalValue" radius={[6, 6, 0, 0]}>
+                                        <Tooltip
+                                            cursor={{ fill: 'rgba(15,76,92,0.04)' }}
+                                            formatter={(value, name) => [`$${value.toLocaleString()}`, name]}
+                                            contentStyle={{ backgroundColor: '#1A1A2E', color: '#fff', borderRadius: '8px', border: 'none' }}
+                                        />
+                                        <Bar dataKey="totalValue" radius={[4, 4, 0, 0]}>
                                             {chartData.map((_, index) => (
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                             ))}
@@ -208,43 +247,66 @@ export default function Results() {
                     </div>
 
                     {/* Detailed Breakdown Table */}
-                    <div className="animate-fadeIn card w-full" style={{ animationDelay: '0.3s', padding: '32px' }}>
-                        <div className="flex items-center justify-between mb-6" style={{ borderBottom: '2px solid #f3f4f6', paddingBottom: '16px' }}>
-                            <h3 className="font-serif text-deep-teal" style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: '0' }}>{t('detailedBreakdown')}</h3>
-                            <button onClick={() => window.print()} className="btn-outline" style={{ padding: '8px 24px', fontSize: '14px' }}>
-                                <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                {t('printReport')}
+                    <div className="card p-6 sm:p-8 mb-8 animate-fadeIn">
+                        <div className="flex flex-wrap items-center justify-between pb-4 mb-4 border-b border-stone-100 gap-3">
+                            <h3 className="font-serif text-deep-teal text-xl sm:text-2xl font-bold">
+                                {t('detailedBreakdown')}
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={() => window.print()}
+                                className="btn-outline text-xs sm:text-sm py-2 px-4 no-print"
+                            >
+                                🖨️ {t('printReport')}
                             </button>
                         </div>
-                        
-                        <div style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #f3f4f6' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+
+                        <div className="overflow-x-auto rounded-xl border border-stone-200">
+                            <table className="w-full text-left text-sm border-collapse">
                                 <thead>
-                                    <tr style={{ backgroundColor: '#f9fafb' }}>
-                                        <th style={{ padding: '16px 20px', fontSize: '14px', fontWeight: 600, color: '#374151', textAlign: isRTL ? 'right' : 'left' }}>{t('heir')}</th>
-                                        <th style={{ padding: '16px 12px', fontSize: '14px', fontWeight: 600, color: '#374151', textAlign: 'center' }}>{t('count')}</th>
-                                        <th style={{ padding: '16px 12px', fontSize: '14px', fontWeight: 600, color: '#374151', textAlign: 'center' }}>{t('sharePercent')}</th>
-                                        <th style={{ padding: '16px 12px', fontSize: '14px', fontWeight: 600, color: '#374151', textAlign: isRTL ? 'left' : 'right' }}>{t('perPerson')}</th>
-                                        <th style={{ padding: '16px 20px', fontSize: '14px', fontWeight: 600, color: '#0F4C5C', textAlign: isRTL ? 'left' : 'right' }}>{t('totalShareValue')}</th>
+                                    <tr className="bg-stone-50 border-b border-stone-200 text-stone-700">
+                                        <th className={`p-3.5 font-bold ${isRTL ? 'text-right' : 'text-left'}`}>{t('heir')}</th>
+                                        <th className="p-3.5 font-bold text-center">{t('count')}</th>
+                                        <th className="p-3.5 font-bold text-center">{t('sharePercent')}</th>
+                                        <th className="p-3.5 font-bold text-center">{t('shareType')}</th>
+                                        <th className={`p-3.5 font-bold ${isRTL ? 'text-left' : 'text-right'}`}>{t('perPerson')}</th>
+                                        <th className={`p-3.5 font-bold ${isRTL ? 'text-left' : 'text-right'}`}>{t('totalShareValue')}</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-stone-100">
                                     {result?.distributions?.map((d, i) => (
-                                        <tr key={i} style={{ borderBottom: i === result.distributions.length - 1 ? 'none' : '1px solid #f3f4f6', transition: 'background-color 0.2s ease', backgroundColor: 'transparent' }} onMouseEnter={e => e.currentTarget.style.backgroundColor='#f3f6f8'} onMouseLeave={e => e.currentTarget.style.backgroundColor='transparent'}>
-                                            <td style={{ padding: '18px 20px', fontWeight: 600, color: '#1f2937', display: 'flex', alignItems: 'center' }}>
-                                                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: COLORS[i % COLORS.length], marginRight: isRTL ? 0 : '12px', marginLeft: isRTL ? '12px' : 0 }}></div>
-                                                {t(d.relationship) || d.relationship_display}
+                                        <tr key={i} className="hover:bg-stone-50/75 transition-colors">
+                                            <td className="p-3.5 font-semibold text-stone-800">
+                                                <div className="flex items-center gap-2">
+                                                    <span
+                                                        className="w-3 h-3 rounded-full flex-shrink-0"
+                                                        style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                                                    />
+                                                    <div>
+                                                        <span>{t(d.relationship) || d.relationship_display}</span>
+                                                        {d.dalil && (
+                                                            <div className="text-[11px] font-normal text-stone-500 mt-0.5">
+                                                                {d.dalil}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </td>
-                                            <td style={{ padding: '18px 12px', color: '#4b5563', textAlign: 'center', fontWeight: '500' }}>{d.count}</td>
-                                            <td style={{ padding: '18px 12px', textAlign: 'center' }}>
-                                                <span style={{ backgroundColor: 'rgba(15,76,92,0.08)', color: '#0F4C5C', padding: '4px 10px', borderRadius: '999px', fontSize: '13px', fontWeight: 700 }}>
-                                                    {d.percentage.toFixed(2)}%
+                                            <td className="p-3.5 text-center text-stone-600 font-medium tabular-nums">{d.count}</td>
+                                            <td className="p-3.5 text-center">
+                                                <span className="bg-deep-teal/10 text-deep-teal px-2.5 py-1 rounded-full text-xs font-bold tabular-nums">
+                                                    {d.percentage.toFixed(2)}% ({d.share_fraction})
                                                 </span>
                                             </td>
-                                            <td style={{ padding: '18px 12px', color: '#4b5563', textAlign: isRTL ? 'left' : 'right', fontWeight: '500' }}>
+                                            <td className="p-3.5 text-center">
+                                                <span className="text-xs px-2 py-0.5 rounded bg-stone-100 font-medium text-stone-600">
+                                                    {t(d.share_type) || d.share_type}
+                                                </span>
+                                            </td>
+                                            <td className={`p-3.5 text-stone-600 font-medium tabular-nums ${isRTL ? 'text-left' : 'text-right'}`}>
                                                 ${Number(d.per_person_value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </td>
-                                            <td style={{ padding: '18px 20px', color: '#D4AF37', fontWeight: 800, textAlign: isRTL ? 'left' : 'right', fontSize: '15px' }}>
+                                            <td className={`p-3.5 font-bold text-amber-800 tabular-nums ${isRTL ? 'text-left' : 'text-right'}`}>
                                                 ${Number(d.total_value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </td>
                                         </tr>
@@ -254,18 +316,47 @@ export default function Results() {
                         </div>
                     </div>
 
+                    {/* Excluded Relatives (Mahjubun) Card */}
+                    {result?.blocked_heirs && result.blocked_heirs.length > 0 && (
+                        <div className="card p-6 sm:p-8 mb-8 bg-stone-50/50 border border-stone-200 animate-fadeIn">
+                            <h3 className="font-serif text-deep-teal text-lg sm:text-xl font-bold mb-4 flex items-center gap-2">
+                                <span>🚫</span>
+                                <span>{t('blockedHeirsTitle')}</span>
+                            </h3>
+                            <div className="space-y-2">
+                                {result.blocked_heirs.map((b, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="p-3 bg-white border border-stone-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm gap-2"
+                                    >
+                                        <span className="font-semibold text-stone-700 line-through decoration-rose-500">
+                                            {t(b.relationship) || b.relationship_display}
+                                        </span>
+                                        <span className="text-stone-500 text-xs bg-stone-100 px-2.5 py-1 rounded font-medium">
+                                            {b.reason}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Action Buttons */}
-                    <div className="animate-fadeIn" style={{ textAlign: 'center', marginTop: '48px', marginBottom: '24px', animationDelay: '0.4s' }}>
-                        <Link to="/" className="btn-primary" style={{ padding: '16px 40px', borderRadius: '8px', fontSize: '16px', textDecoration: 'none' }}>{t('backToHome')}</Link>
+                    <div className="flex flex-wrap justify-center gap-4 mt-8 mb-4 no-print animate-fadeIn">
+                        <Link to="/calculator" className="btn-secondary text-sm">
+                            {t('backToCalculator')}
+                        </Link>
+                        <Link to="/" className="btn-primary text-sm">
+                            {t('backToHome')}
+                        </Link>
                     </div>
+
                 </div>
             </main>
 
-            <footer style={{ backgroundColor: '#1A1A2E', color: 'white', padding: '32px 0', marginTop: 'auto', width: '100%', display: 'flex', justifyContent: 'center' }}>
-                <div style={{ width: '100%', maxWidth: '1100px', padding: '0 32px', textAlign: 'center' }}>
-                    <p style={{ color: '#d1d5db', fontWeight: '600' }}>{t('appTitle')} - {t('appSubtitle')}</p>
-                    <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>{t('footerDesc')}</p>
-                </div>
+            <footer className="bg-dark text-white py-8 mt-auto w-full text-center text-xs text-stone-400 no-print">
+                <p className="font-semibold text-stone-300 text-sm mb-1">{t('appTitle')} - {t('appSubtitle')}</p>
+                <p>{t('footerDesc')}</p>
             </footer>
         </div>
     );
