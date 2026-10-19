@@ -25,6 +25,10 @@ export const en = {
     funeralExpenses: "Funeral Expenses (Optional)",
     outstandingDebts: "Outstanding Debts (Optional)",
     nextAssets: "Next: Assets",
+    resetForm: "Reset Form",
+    clearDraftConfirm: "Are you sure you want to clear your current draft?",
+    assetsInvalidError: "Please ensure all assets have a valid name and a positive value greater than 0.",
+    debtsExceedEstateError: "Outstanding debts and funeral expenses cannot exceed the total estate value.",
 
     estateAssets: "Estate Assets",
     totalValue: "Total Value",
@@ -70,6 +74,21 @@ export const en = {
     totalShareValue: "Total Value",
     backToHome: "Back to Home",
     printReport: "Print Report",
+
+    // Sharia Jurisprudence Metadata
+    aslAlMasala: "Base Denominator (Asl al-Mas'ala)",
+    awlApplied: "Awl Applied (Estate Deficit)",
+    raddApplied: "Radd Applied (Surplus Redistribution)",
+    umariyyatanApplied: "Umariyyatan Rule Applied (1/3 of Remainder to Mother)",
+    shareType: "Share Type",
+    evidenceTitle: "Jurisprudential Basis (Dalil)",
+    blockedHeirsTitle: "Excluded Relatives (Mahjubun)",
+    exclusionReason: "Reason for Exclusion",
+    FARD: "Fixed Share (Fard)",
+    TASIB: "Residuary (Ta'sib)",
+    FARD_AND_TASIB: "Fard + Ta'sib",
+    AWL: "Adjusted by Awl",
+    RADD: "Increased by Radd",
 
     // Relationships & Types
     HUSBAND: "Husband",

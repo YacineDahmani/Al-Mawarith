@@ -25,6 +25,10 @@ export const ar = {
     funeralExpenses: "نفقات الجنازة (اختياري)",
     outstandingDebts: "الديون المستحقة (اختياري)",
     nextAssets: "التالي: الأصول",
+    resetForm: "إعادة تعيين النموذج",
+    clearDraftConfirm: "هل أنت متأكد من رغبتك في مسح المسودة الحالية؟",
+    assetsInvalidError: "يرجى التأكد من أن جميع الأصول تحمل اسماً وقيمة أكبر من الصفر.",
+    debtsExceedEstateError: "لا يمكن أن تتجاوز الديون ونفقات الجنازة إجمالي قيمة التركة.",
 
     estateAssets: "أصول التركة",
     totalValue: "القيمة الإجمالية",
@@ -70,6 +74,21 @@ export const ar = {
     totalShareValue: "القيمة الإجمالية",
     backToHome: "العودة للرئيسية",
     printReport: "طباعة التقرير",
+
+    // Sharia Jurisprudence Metadata
+    aslAlMasala: "أصل المسألة",
+    awlApplied: "مسألة عائلة (العول لنقص التركة)",
+    raddApplied: "مسألة ردية (الرد لفائض التركة)",
+    umariyyatanApplied: "تطبيق المسألة العمرية (ثلث الباقي للأم)",
+    shareType: "نوع الاستحقاق",
+    evidenceTitle: "السند الشرعي (الدليل)",
+    blockedHeirsTitle: "المحجوبون من الإرث",
+    exclusionReason: "سبب الحجب",
+    FARD: "فرض",
+    TASIB: "عصبة",
+    FARD_AND_TASIB: "فرض وعصبة",
+    AWL: "مُعول",
+    RADD: "مردود عليه",
 
     // Relationships & Types
     HUSBAND: "زوج",
